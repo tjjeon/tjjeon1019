@@ -62,7 +62,7 @@ public:
 		time_info = std::to_string(year) + "/" + std::to_string(month) + "/"
 			+ std::to_string(day) + "/" + "]" + ".txt";
 
-		text_name = information + "_" + "[" + std::to_string(year) + " " + std::to_string(month) +
+		text_name = information + "_" + "[" + std::to_string(year) + "y" + std::to_string(month) +
 			" " + std::to_string(day) + "  " + "]" + ".txt";
 
 		log_info = "[" + information + "] " + file_name + " " + func_name + " " + std::to_string(line_num) + " " +
@@ -72,11 +72,11 @@ public:
 
 	void Command() {
 
-		Write(text_name);
+		 writefile(text_name);
 
 	}
 
-	void Write(std::string filePath) {
+	void writefile(std::string filePath) {
 		FILE* fp = fopen(filePath.c_str(), "a");
 		if (fp == nullptr) {
 			fprintf(stderr, "File Open Error\n");
