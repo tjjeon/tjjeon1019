@@ -101,17 +101,7 @@ public:
 		fprintf(fp, log_info.c_str());
 		fflush(fp);
 
-		//int size = GetSize(filePath);
 
-		//std::cout << "file size" << size << std::endl;
-		//std::ofstream writeFile(filePath.data(), std::ios::app);
-		//if (writeFile.is_open()) {
-		//	writeFile << log_info << "\n";
-		//}
-		//writeFile.close();
-
-
-		//std::cout << log_info << std::endl;
 	}
 
 };
