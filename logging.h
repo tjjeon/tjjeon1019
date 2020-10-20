@@ -27,22 +27,6 @@ enum severity {
 #define LOG(level)  logprint(level,__FILE__,__FUNCTION__,__LINE__);  
 
 
-int GetSize(std::string s) {
-
-	int size = 0;
-	FILE* fp = fopen(s.c_str(), "r");
-	if (fp == nullptr) {
-		return 0;
-	}
-
-	fseek(fp, 0, SEEK_END);    
-	size = ftell(fp);          
-
-	fclose(fp);
-	printf("사이즈는 : % d", size);
-	return size;
-}
-
 
 class Log {
 	std::string log_info;
