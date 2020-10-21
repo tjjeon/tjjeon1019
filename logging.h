@@ -1,109 +1,199 @@
+//#ifndef _LOGGING_H_
+//#define _LOGGING_H_
 
 
+// 요구사항
 // 1. 모듈 또는 소스 파일의 어떤 함수, 어떤 위치에서 발생한 정보인지 알수 있어야 한다.
-// 2. 로깅 정보가 다양한 목적지로 저장 / 전송 될 수 있어야 한다./
+// 2. 로깅 정보가 다양한 목적지로 저장 / 전송 될 수 있어야 한다.
 // 3. 로깅의 출력 레벨을 조정할 수 있어야 한다.
 // 4. 로깅의 정확한 날짜와 시간을 기록할 수 있어야 한다.
 // 5. 로깅을 날짜별 시간별로 다른 파일로 기록할 것.
 // 6. 로그 파일이 지정된 크기를 넘어설 경우, 자동으로 다른 파일에 기록할 수 있어야 한다.
 
+
 #define _CRT_SECURE_NO_WARNINGS
+
+
+
+// '기능 구현'
 #include <iostream>
-#include <stdio.h>
 #include <string>
-#include <fstream>
-#include <iostream>
 #include <time.h>
 
+using namespace std;
 
-
-enum severity {
-	ERROR,
-	WARN,
-	INFO,
-	DEBUG,
-	TRACE
+enum Level {
+    INFO,
+    WARN,
+    DEBUG,
+    ERROR
 };
-#define LOG(level)  logprint(level,__FILE__,__FUNCTION__,__LINE__);  
 
-
-
-class fileclass {
-	std::string log_info;
-	std::string filePath;
-	std::string information;
-	std::string file_name;
-	std::string func_name;
-	std::string text_name;
-
-	int line_num;
-	int year;
-	int month;
-	int day;
-	int hour;
-	int minute;
-	int second;
-
+class Context {
 public:
-	fileclass(std::string info, std::string fn, std::string fcn, int lnum) {
-		time_t t = time(NULL);
-		struct tm tm = *localtime(&t);
-		information = info;
-		year = tm.tm_year + 1900;
-		month = tm.tm_mon + 1;
-		day = tm.tm_mday;
-		hour = tm.tm_hour;
-		minute = tm.tm_min;
-		second = tm.tm_sec;
-		file_name = fn;
-		func_name = fcn;
-		line_num = lnum;
+    Context(const std::string& f, int l) : function(f), line(l) {}
 
-		text_name = information + "_" + std::to_string(year) + "." + std::to_string(month) +
-			"." + std::to_string(day) + ".txt";
+    // foo:42
+    std::string toString() const {
+        return function + ":" + std::to_string(line);
+    }
 
-		log_info = "[" + information + "] " + file_name + " " + func_name + " " + std::to_string(line_num) + " " +
-			"[ date: " + std::to_string(year) + "/" + std::to_string(month) + "/" + std::to_string(day) + "/  time : " + std::to_string(hour) +
-			"h" + std::to_string(minute) + "m" + std::to_string(second) + "s" + "]";
-	}
+private:
+    std::string function;
+    int line;
+};
 
-	void Command() {
+class Timestamp {
+public:
+    Timestamp(int y, int m, int d, int h, int mi, int s)
+        : year(y), month(m), day(d), hour(h), minute(mi), second(s) {}
 
-		 writefile(text_name);
+    static Timestamp current() {
+        time_t current = time(nullptr);
+        struct tm* t = localtime(&current);
 
-	}
+        Timestamp ts(t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+        return ts;
+    }
 
-	void writefile(std::string filePath) 
-	{
-		FILE* fp = fopen(filePath.c_str(), "a");
-		if (fp == nullptr) {
-			fprintf(stderr, "File Open Error\n");
-		};
-		std::cout << log_info << std::endl;
-		fprintf(fp, log_info.c_str());
-		fflush(fp);
+    // "2020.10.20 08:20:35"
+    std::string toString() const {
+        char buf[128];
+        sprintf(buf, "%4d.%02d.%02d %02d:%02d:%2d",
+            year, month, day, hour, minute, second
+        );
+
+        return buf;
+    }
+private:
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+};
+
+class Logger {
+public:
+    Logger() : printToStdout(false) {}
+
+    static Logger& getInstance() {
+        static Logger instance;
+        return instance;
+    }
+
+    void setPrintToStdout(bool b) {
+        printToStdout = b;
+    }
+
+    std::string getLevelString(Level level) const {
+        switch (level) {
+        case INFO:
+            return "INFO";
+        case WARN:
+            return "WARN";
+        case DEBUG:
+            return "DEBUG";
+        case ERROR:
+            return "ERROR";
+            
+        default:
+            return "";
+        }
+    }
+
+    FILE* getFile(Level level, const char* writemode) const {
+        switch (level) {
+        case INFO:
+            return fopen("info.log", writemode);
+        case WARN:
+            return fopen("info.log", writemode);
+        case DEBUG:
+            return fopen("debug.log", writemode);
+        case ERROR:
+            return fopen("error.log", writemode);
+        default:
+            return nullptr;
+        }
+    }
+
+    void write(Level level, const std::string& message, const Context& context, const Timestamp& timestamp) {
+        FILE* fp = getFile(level,"a");
+
+        // INFO 2020.10.20 10:30:22 foo:30> 
+        std::string header = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
+        
+        
+        //std::string filename = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
 
 
-	}
+        if (printToStdout) {
+            printf("%s> %s\n", header.c_str(), message.c_str());
+        }
+        fprintf(fp, "%s> %s\n", header.c_str(), message.c_str());
+
+        fclose(fp);
+    }
+
+    int GetSize(Level level, std::string s) {
+
+        int size = 0;
+        /*
+        switch (level) {
+        case INFO:
+            return fopen("info.log", "r");
+        case WARN:
+            return fopen("info.log", "r");
+        case DEBUG:
+            return fopen("debug.log", "r");
+        case ERROR:
+            return fopen("error.log", "r");
+        default:
+            return nullptr;
+        }
+        */
+
+        FILE* fp = getFile(level, "r");
+        if (fp == nullptr) {
+            return 0;
+        }
+
+        fseek(fp, 0, SEEK_END);
+        size = ftell(fp);
+
+        fclose(fp);
+        printf("사이즈는 : % d", size);
+        return size;
+    }
+
+private:
+    bool printToStdout;
+
+    // 싱글톤 복사와 대입금지기법
+    Logger(const Logger&) = delete;
+    void operator=(const Logger&) = delete;
 
 };
 
-void logprint(int loglevel, const char* filename, const char* funcname, const int& linenum) {
-	std::string s;
 
-	switch (loglevel)
-	{
-	case(0): s = "ERROR"; break;
-	case(1): s = "WARN"; break;
-	case(2): s = "INFO"; break;
-	case(3): s = "DEBUG"; break;
-	case(4): s = "TRACE"; break;
 
-	default:
-		break;
-	}
-	
 
-	fileclass* m = new fileclass(s, filename, funcname, linenum);
-	m->Command();
+#define LOG(level, message) Logger::getInstance().write(level, message, Context(__func__, __LINE__), Timestamp::current());
+/*
+int main() {
+
+#if 0
+  Logger l;
+  l.setPrintToStdout(true);
+
+  l.write(INFO, "hello", Context(__func__, __LINE__), Timestamp::current());
+#endif
+  Logger::getInstance().setPrintToStdout(true);
+  Logger::getInstance().write(INFO, "hello", Context(__func__, __LINE__), Timestamp::current());
+
+  LOG(INFO, "hello");
 }
+
+*/
+
