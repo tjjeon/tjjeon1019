@@ -15,6 +15,7 @@
 
 
 
+
 // '기능 구현'
 #include <iostream>
 #include <string>
@@ -76,6 +77,8 @@ private:
 
 class Logger {
 public:
+    
+  
     Logger() : printToStdout(false) {}
 
     static Logger& getInstance() {
@@ -103,12 +106,17 @@ public:
         }
     }
 
-    FILE* getFile(Level level, const char* writemode) const {
+    FILE* getFile(Level level, int filenumber, const char* writemode) const {
+        std::string filename;
         switch (level) {
         case INFO:
+            //filename = "info" + std::to_string(filenumber) + ".log";
+            //char filenum = (char*)filenumber;
+            //const char* filech = filenumber + "info.log"; .
             return fopen("info.log", writemode);
         case WARN:
-            return fopen("info.log", writemode);
+            
+            return fopen("warn.log", writemode);
         case DEBUG:
             return fopen("debug.log", writemode);
         case ERROR:
@@ -119,7 +127,20 @@ public:
     }
 
     void write(Level level, const std::string& message, const Context& context, const Timestamp& timestamp) {
-        FILE* fp = getFile(level,"a");
+        int filenum = 0;
+        int i;
+        for (i = 0; i < 10; ++i)
+        {
+            int filesize = GetSize(level, i);
+            if (filesize > 2000)
+            {
+                filenum = i;
+                printf("파일번호 : %d", filenum);
+            }
+            
+                
+        }
+        FILE* fp = getFile(level, filenum, "a");
 
         // INFO 2020.10.20 10:30:22 foo:30> 
         std::string header = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
@@ -136,25 +157,11 @@ public:
         fclose(fp);
     }
 
-    int GetSize(Level level, std::string s) {
+    int GetSize(Level level, int filenumber) {
 
         int size = 0;
-        /*
-        switch (level) {
-        case INFO:
-            return fopen("info.log", "r");
-        case WARN:
-            return fopen("info.log", "r");
-        case DEBUG:
-            return fopen("debug.log", "r");
-        case ERROR:
-            return fopen("error.log", "r");
-        default:
-            return nullptr;
-        }
-        */
-
-        FILE* fp = getFile(level, "r");
+        
+        FILE* fp = getFile(level, filenumber,  "r");
         if (fp == nullptr) {
             return 0;
         }
@@ -163,7 +170,7 @@ public:
         size = ftell(fp);
 
         fclose(fp);
-        printf("사이즈는 : % d", size);
+        printf("File size : % d\n", size);
         return size;
     }
 
@@ -180,6 +187,8 @@ private:
 
 
 #define LOG(level, message) Logger::getInstance().write(level, message, Context(__func__, __LINE__), Timestamp::current());
+
+
 /*
 int main() {
 

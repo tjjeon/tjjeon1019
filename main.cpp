@@ -22,7 +22,7 @@ int main() {
 	Logger::getInstance().setPrintToStdout(true);
 	Logger::getInstance().write(INFO, "hello", Context(__func__, __LINE__), Timestamp::current());
 
-	LOG(INFO, "hello");
+	LOG(INFO, "info메시지");
 	LOG(DEBUG, "debug메시지");
 	LOG(WARN, "warn메시지");
 	LOG(ERROR, "error메시지");
