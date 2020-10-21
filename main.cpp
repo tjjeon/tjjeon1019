@@ -24,14 +24,15 @@ int keyinput() {
 
     while (1) {
         getchar();
-        LOG(INFO);
-        getchar();
-        LOG(DEBUG);
         getchar();
         LOG(ERROR);
+        LOG(WARN);
+        LOG(INFO);
+        LOG(DEBUG);
+        LOG(TRACE);
     }
 }
-
+int fileinput();
 
 class BaseMenu {
     std::string title;
@@ -47,6 +48,11 @@ public:
             //getchar();
             //LOG(INFO);
             keyinput();
+        }
+        else if (title == "파일 입력 로깅")
+        {
+            cout << "파일" << endl;
+            fileinput();
         }
         return title; }
 
@@ -66,7 +72,7 @@ public:
 };
 
 class PopupMenu : public BaseMenu {
-    std::vector<BaseMenu*> v;          // 재귀적 포함
+    std::vector<BaseMenu*> v;          
 public:
     PopupMenu(const std::string& s) : BaseMenu(s) {}
 
@@ -74,7 +80,7 @@ public:
 
     void command() override {
         while (1) {
-            system("cls");  // system("cls");
+            system("cls"); 
             int sz = v.size();
             for (int i = 0; i < sz; ++i) {
                 cout << i + 1 << ". " << v[i]->getTitle() << endl;
@@ -129,6 +135,7 @@ int main() {
 
     p3->addMenu(new MenuItem("기본저장소"));
     p3->addMenu(new MenuItem("외장디스크"));
+    p3->addMenu(new MenuItem("파일에 경로 지정"));
     
     p4->addMenu(new MenuItem("로깅 메시지 띄우는 법"));
     p4->addMenu(new MenuItem("로그 레벨"));

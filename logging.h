@@ -28,7 +28,7 @@ enum severity {
 
 
 
-class Log {
+class fileclass {
 	std::string log_info;
 	std::string filePath;
 	std::string information;
@@ -45,7 +45,7 @@ class Log {
 	int second;
 
 public:
-	Log(std::string info, std::string fn, std::string fcn, int lnum) {
+	fileclass(std::string info, std::string fn, std::string fcn, int lnum) {
 		time_t t = time(NULL);
 		struct tm tm = *localtime(&t);
 		information = info;
@@ -62,8 +62,8 @@ public:
 		time_info = std::to_string(year) + "/" + std::to_string(month) + "/"
 			+ std::to_string(day) + "/" + "]" + ".txt";
 
-		text_name = information + "_" + "[" + std::to_string(year) + "y" + std::to_string(month) +
-			" " + std::to_string(day) + "  " + "]" + ".txt";
+		text_name = information + "_" + std::to_string(year) + "." + std::to_string(month) +
+			"." + std::to_string(day) + ".txt";
 
 		log_info = "[" + information + "] " + file_name + " " + func_name + " " + std::to_string(line_num) + " " +
 			"[ date: " + std::to_string(year) + "/" + std::to_string(month) + "/" + std::to_string(day) + "/  time : " + std::to_string(hour) +
@@ -106,6 +106,6 @@ void logprint(int which_log, const char* filename, const char* funcname, const i
 	}
 	
 
-	Log* m = new Log(s, filename, funcname, linenum);
+	fileclass* m = new fileclass(s, filename, funcname, linenum);
 	m->Command();
 }
