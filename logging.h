@@ -35,7 +35,7 @@ class fileclass {
 	std::string file_name;
 	std::string func_name;
 	std::string text_name;
-	std::string time_info;
+
 	int line_num;
 	int year;
 	int month;
@@ -59,9 +59,6 @@ public:
 		func_name = fcn;
 		line_num = lnum;
 
-		time_info = std::to_string(year) + "/" + std::to_string(month) + "/"
-			+ std::to_string(day) + "/" + "]" + ".txt";
-
 		text_name = information + "_" + std::to_string(year) + "." + std::to_string(month) +
 			"." + std::to_string(day) + ".txt";
 
@@ -76,7 +73,8 @@ public:
 
 	}
 
-	void writefile(std::string filePath) {
+	void writefile(std::string filePath) 
+	{
 		FILE* fp = fopen(filePath.c_str(), "a");
 		if (fp == nullptr) {
 			fprintf(stderr, "File Open Error\n");
@@ -90,10 +88,10 @@ public:
 
 };
 
-void logprint(int which_log, const char* filename, const char* funcname, const int& linenum) {
+void logprint(int loglevel, const char* filename, const char* funcname, const int& linenum) {
 	std::string s;
 
-	switch (which_log)
+	switch (loglevel)
 	{
 	case(0): s = "ERROR"; break;
 	case(1): s = "WARN"; break;

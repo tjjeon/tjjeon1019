@@ -32,7 +32,7 @@ int keyinput() {
         LOG(TRACE);
     }
 }
-int fileinput();
+//int fileinput();
 
 class BaseMenu {
     std::string title;
@@ -52,7 +52,7 @@ public:
         else if (title == "파일 입력 로깅")
         {
             cout << "파일" << endl;
-            fileinput();
+            //fileinput();
         }
         return title; }
 
