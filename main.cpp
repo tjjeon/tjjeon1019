@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
-
+#ifndef _MAX_PATH
+#define _MAX_PATH 260
+#endif
 // 요구사항
 // 1. 모듈 또는 소스 파일의 어떤 함수, 어떤 위치에서 발생한 정보인지 알수 있어야 한다.
 // 2. 로깅 정보가 다양한 목적지로 저장 / 전송 될 수 있어야 한다.
@@ -13,6 +15,8 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <direct.h>		//mkdir
+#include <errno.h>		//errno
 //#include "logging.h"
 //#include "Timestamp.h"
 #include "context.h"
@@ -61,12 +65,9 @@ public:
     }
 
     FILE* getFile(Level level, const char* writemode, std::string filename) const {
-        
+        /*
         switch (level) {
         case INFO:
-            //filename = "info" + std::to_string(filenumber) + ".log";
-            //char filenum = (char*)filenumber;
-            //const char* filech = filenumber + "info.log"; .
             return fopen(filename.c_str(), writemode);
         case WARN:
 
@@ -77,22 +78,34 @@ public:
             return fopen("error.log", writemode);
         default:
             return nullptr;
-        }
+           
+        
+        } */
+        return fopen(filename.c_str(), writemode);
     }
 
-    void write(Level level, const std::string& message, const Context& context, const Timestamp& timestamp, const FileTimestamp& filetimestamp) {
+    void write(const std::string& dir, Level level, const std::string& message, const Context& context, const Timestamp& timestamp, const FileTimestamp& filetimestamp) {
         
+        //char strBuffer[_MAX_PATH] = { 0, };
+        //char strChangeDir[_MAX_PATH] = { "D:\\LOGEXAM" };
+
         
 
         // INFO 2020.10.20 10:30:22 foo:30> 
         std::string header = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
-        std::string info = getLevelString(level);
+        //std::string info = getLevelString(level);
 
         //std::string filename = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
-        filename = getLevelString(level) + " " + filetimestamp.toString() + ".log";
-        //filename = "info.log";
+        const char* cdir = dir.c_str();
+        //char strFolderPath[] = { cdir};
+
+        int nResult = _mkdir(cdir);
+
+        
+        filename = dir.c_str()+getLevelString(level) + " " + filetimestamp.toString() + ".log";
+        
         cout << filename << endl;
-        //filename = "info.log";
+        
         FILE* fp = getFile(level, "a", filename);
 
         if (printToStdout) {
@@ -119,7 +132,7 @@ public:
         printf("File size : % d\n", size);
         return size;
     }
-
+    
 private:
     bool printToStdout;
 
@@ -135,12 +148,12 @@ private:
 
 static Timestamp current();
 
-#define LOG(level, message) Logger::getInstance().write(level, message, Context(__func__, __LINE__), Timestamp::current(), FileTimestamp::current());
+#define LOG(dir, level, message) Logger::getInstance().write(dir, level, message, Context(__func__, __LINE__), Timestamp::current(), FileTimestamp::current());
 int main() {
 
     Logger::getInstance().setPrintToStdout(true);
-	LOG(INFO, "info메시지");
-	LOG(DEBUG, "debug메시지");
-	LOG(WARN, "warn메시지");
-	LOG(ERROR, "error메시지");
+	LOG("LOG\\", INFO, "info메시지");
+	LOG("LOG\\",DEBUG, "debug메시지");
+	LOG("LOG\\",WARN, "warn메시지");
+	LOG("LOG\\",ERROR, "error메시지");
 }
