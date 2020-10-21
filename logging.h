@@ -187,22 +187,3 @@ private:
 
 
 #define LOG(level, message) Logger::getInstance().write(level, message, Context(__func__, __LINE__), Timestamp::current());
-
-
-/*
-int main() {
-
-#if 0
-  Logger l;
-  l.setPrintToStdout(true);
-
-  l.write(INFO, "hello", Context(__func__, __LINE__), Timestamp::current());
-#endif
-  Logger::getInstance().setPrintToStdout(true);
-  Logger::getInstance().write(INFO, "hello", Context(__func__, __LINE__), Timestamp::current());
-
-  LOG(INFO, "hello");
-}
-
-*/
-
