@@ -134,7 +134,7 @@ public:
             int filesize = GetSize(level, i);
             if (filesize > 2000)
             {
-                filenum = i;
+                filenum = i+1;
                 printf("파일번호 : %d", filenum);
             }
             
