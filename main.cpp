@@ -21,7 +21,7 @@
 #include "timestamp.h"
 #include "filetimestamp.h"
 
-//using namespace std;
+
 
 enum Level {
     INFO,
@@ -72,33 +72,27 @@ public:
         
         int MaxSize = 200;
         int filenum = 0;
-        //int i;
-        
 
-        // INFO 2020.10.20 10:30:22 foo:30> 
+
         std::string header = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
 
-
-        //std::string filename = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
         const char* cdir = dir.c_str();
-        //char strFolderPath[] = { cdir};
+      
 
         int nResult = _mkdir(cdir);
 
         char strfilenum[128];
         sprintf(strfilenum, "%02d", filenum);
         filename = dir.c_str()+getLevelString(level) + " " + filetimestamp.toString() + "no." + strfilenum + ".log";
-        int filesize = getSize(level, filename);
-        while (getSize(level, filename) > MaxSize)
+        int filesize = fileSize(level, filename);
+        while (fileSize(level, filename) > MaxSize)
         {
             ++filenum;
             sprintf(strfilenum, "%02d", filenum);
             filename = dir.c_str() + getLevelString(level) + " " + filetimestamp.toString() + "no." + strfilenum + ".log";
-            printf("파일번호 : %d", filenum);
+            printf("파일번호 : %d\n", filenum);
         }
             
-        
-        //std::cout << filename << std::endl;
         
         FILE* fp = getFile(level, "a", filename);
 
@@ -110,7 +104,7 @@ public:
         fclose(fp);
     }
 
-    int getSize(Level level, std::string filename) const {
+    int fileSize(Level level, std::string filename) const {
 
         int size = 0;
 
