@@ -17,13 +17,11 @@
 #include <time.h>
 #include <direct.h>		//mkdir
 #include <errno.h>		//errno
-//#include "logging.h"
-//#include "Timestamp.h"
 #include "context.h"
-//#include "logger.h"
-#include "Timestamp.h"
+#include "timestamp.h"
+#include "filetimestamp.h"
 
-using namespace std;
+//using namespace std;
 
 enum Level {
     INFO,
@@ -38,7 +36,7 @@ public:
 
 
     Logger() : printToStdout(false) {}
-
+    
     static Logger& getInstance() {
         static Logger instance;
         return instance;
@@ -65,35 +63,21 @@ public:
     }
 
     FILE* getFile(Level level, const char* writemode, std::string filename) const {
-        /*
-        switch (level) {
-        case INFO:
-            return fopen(filename.c_str(), writemode);
-        case WARN:
-
-            return fopen("warn.log", writemode);
-        case DEBUG:
-            return fopen("debug.log", writemode);
-        case ERROR:
-            return fopen("error.log", writemode);
-        default:
-            return nullptr;
-           
-        
-        } */
+       
         return fopen(filename.c_str(), writemode);
     }
 
     void write(const std::string& dir, Level level, const std::string& message, const Context& context, const Timestamp& timestamp, const FileTimestamp& filetimestamp) {
         
-        //char strBuffer[_MAX_PATH] = { 0, };
-        //char strChangeDir[_MAX_PATH] = { "D:\\LOGEXAM" };
-
+        
+        int MaxSize = 200;
+        int filenum = 0;
+        //int i;
         
 
         // INFO 2020.10.20 10:30:22 foo:30> 
         std::string header = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
-        //std::string info = getLevelString(level);
+
 
         //std::string filename = getLevelString(level) + " " + timestamp.toString() + " " + context.toString();
         const char* cdir = dir.c_str();
@@ -101,10 +85,20 @@ public:
 
         int nResult = _mkdir(cdir);
 
+        char strfilenum[128];
+        sprintf(strfilenum, "%02d", filenum);
+        filename = dir.c_str()+getLevelString(level) + " " + filetimestamp.toString() + "no." + strfilenum + ".log";
+        int filesize = getSize(level, filename);
+        while (getSize(level, filename) > MaxSize)
+        {
+            ++filenum;
+            sprintf(strfilenum, "%02d", filenum);
+            filename = dir.c_str() + getLevelString(level) + " " + filetimestamp.toString() + "no." + strfilenum + ".log";
+            printf("파일번호 : %d", filenum);
+        }
+            
         
-        filename = dir.c_str()+getLevelString(level) + " " + filetimestamp.toString() + ".log";
-        
-        cout << filename << endl;
+        //std::cout << filename << std::endl;
         
         FILE* fp = getFile(level, "a", filename);
 
@@ -116,7 +110,7 @@ public:
         fclose(fp);
     }
 
-    int GetSize(Level level, int filenumber) {
+    int getSize(Level level, std::string filename) const {
 
         int size = 0;
 
@@ -129,10 +123,13 @@ public:
         size = ftell(fp);
 
         fclose(fp);
-        printf("File size : % d\n", size);
+        //printf("File size : %d bytes\n", size);
         return size;
+
+
+
     }
-    
+
 private:
     bool printToStdout;
 
@@ -149,11 +146,14 @@ private:
 static Timestamp current();
 
 #define LOG(dir, level, message) Logger::getInstance().write(dir, level, message, Context(__func__, __LINE__), Timestamp::current(), FileTimestamp::current());
+#define PRINTDISPLAY(print) Logger::getInstance().setPrintToStdout(print);
+
 int main() {
 
-    Logger::getInstance().setPrintToStdout(true);
-	LOG("LOG\\", INFO, "info메시지");
+    
+    PRINTDISPLAY(true);
+	LOG("", INFO, "info메시지");
 	LOG("LOG\\",DEBUG, "debug메시지");
-	LOG("LOG\\",WARN, "warn메시지");
+	LOG("D:\\LOG\\",WARN, "warn메시지");
 	LOG("LOG\\",ERROR, "error메시지");
 }
